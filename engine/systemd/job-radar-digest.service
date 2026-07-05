@@ -1,0 +1,10 @@
+[Unit]
+Description=Job Radar - send Telegram digest
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=youruser
+WorkingDirectory=/home/youruser/job-radar/engine
+ExecStart=/usr/bin/node --env-file=/home/youruser/job-radar/engine/.env /home/youruser/job-radar/engine/src/cli.js digest

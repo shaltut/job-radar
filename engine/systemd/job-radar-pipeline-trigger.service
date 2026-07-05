@@ -1,0 +1,17 @@
+[Unit]
+Description=Job Radar - run any queued pipeline step (discover/score/tailor) on demand
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=youruser
+WorkingDirectory=/home/youruser/job-radar/engine
+# Each step claims only its own queued requests and exits cheaply when none are pending.
+# '-' prefix: a failure in one step does not block the others.
+ExecStart=-/usr/bin/node --env-file=/home/youruser/job-radar/engine/.env /home/youruser/job-radar/engine/src/cli.js discover --if-requested
+ExecStart=-/usr/bin/node --env-file=/home/youruser/job-radar/engine/.env /home/youruser/job-radar/engine/src/cli.js score --if-requested
+ExecStart=-/usr/bin/node --env-file=/home/youruser/job-radar/engine/.env /home/youruser/job-radar/engine/src/cli.js tailor --if-requested
+ExecStart=-/usr/bin/node --env-file=/home/youruser/job-radar/engine/.env /home/youruser/job-radar/engine/src/cli.js preview --if-requested
+# Backstop: a wedged run can't hang the timer forever (per-source AbortSignal is primary).
+RuntimeMaxSec=3600

@@ -1,0 +1,19 @@
+{
+  "first_name": "Your",
+  "last_name": "Name",
+  "full_name": "Your Name",
+  "email": "you@example.com",
+  "phone": "+1 000 000 0000",
+  "location_city": "City",
+  "location_country": "Country",
+  "linkedin": "https://www.linkedin.com/in/your-handle/",
+  "github": "https://github.com/your-handle",
+  "portfolio": "https://your-site.example",
+  "work_authorization": "e.g. Based in <country>; open to remote-global and to relocation with visa sponsorship",
+  "years_experience": "9",
+  "current_title": "Current Title",
+  "current_company": "Current Company",
+  "salary_expectation": "",
+  "notice_period_days": "30",
+  "willing_to_relocate": "Yes, with visa sponsorship"
+}

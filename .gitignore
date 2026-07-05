@@ -1,0 +1,32 @@
+# env
+.env
+.env.*
+!.env.example
+
+# deps
+node_modules/
+/app/node_modules/
+/engine/node_modules/
+
+# Next.js
+/app/.next/
+/app/out/
+*.tsbuildinfo
+next-env.d.ts
+
+# engine runtime output (tailored PDFs, personal data) + personal config
+/engine/output/
+/engine/apply-log/
+/engine/config/resume.json
+/engine/config/profile.json
+/engine/config/apply-profile.json
+/engine/config/credentials.json
+/engine/config/cv.md
+
+# location-normalization migration backups (real data dumps — never commit)
+/app/scripts/backups/
+
+# misc
+.DS_Store
+*.log
+/app/coverage/

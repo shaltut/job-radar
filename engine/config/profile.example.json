@@ -1,0 +1,6 @@
+{
+  "includeKeywords": ["backend", "software engineer", "full stack", "platform engineer", "devops"],
+  "requireKeywords": [],
+  "excludeKeywords": ["junior", "intern", "internship", "unpaid"],
+  "remoteOnly": false
+}

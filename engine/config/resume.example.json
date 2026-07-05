@@ -1,0 +1,12 @@
+{
+  "name": "Your Name",
+  "title": "Current title",
+  "seniority": "e.g. Senior / Lead / Staff",
+  "years": "e.g. ~9 years",
+  "location": "City, Country",
+  "summary": "One-paragraph professional summary.",
+  "skills": ["skill1", "skill2"],
+  "domains": ["domain1"],
+  "experience": [{ "title": "Role", "company": "Co", "dates": "2022–Present", "summary": "what you did" }],
+  "education": [{ "title": "Degree/Cert", "org": "Institution", "year": "2018" }]
+}

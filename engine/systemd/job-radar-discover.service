@@ -1,0 +1,12 @@
+[Unit]
+Description=Job Radar - discover jobs
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=youruser
+WorkingDirectory=/home/youruser/job-radar/engine
+ExecStart=/usr/bin/node --env-file=/home/youruser/job-radar/engine/.env /home/youruser/job-radar/engine/src/cli.js discover
+# Backstop: a wedged run can't hang the timer forever (per-source AbortSignal is primary).
+RuntimeMaxSec=3600

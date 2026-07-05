@@ -1,0 +1,10 @@
+# supercronic schedule for the `engine` container — 1:1 translation of the bare-metal
+# systemd timers in engine/systemd/ (see the README's "Option B" for that alternative).
+# TZ is read from the JOBRADAR_TZ env var (see .env.example); supercronic itself always
+# evaluates schedules in the container's TZ setting, so make sure it's set consistently.
+
+0 * * * *            node src/cli.js discover
+15 0,6,12,18 * * *   node src/cli.js score
+0 8 * * *            node src/cli.js digest
+*/30 * * * *         node src/cli.js tailor
+* * * * *            node src/cli.js discover --if-requested && node src/cli.js score --if-requested && node src/cli.js tailor --if-requested && node src/cli.js preview --if-requested

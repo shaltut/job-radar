@@ -1,0 +1,96 @@
+# Job Radar — self-host "one command to run it".
+#
+#   cp .env.example .env   # fill in the placeholders, see README.md
+#   docker compose up -d --build
+#
+# Four services: postgres (data) -> migrate (one-shot schema bootstrap) -> jobs-app (web UI)
+#                                                                        -> engine (discover/score/tailor/digest, on a schedule)
+# jobs-app and engine both depend on migrate finishing successfully first.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    env_file: [ .env ]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres/init-roles.sh:/docker-entrypoint-initdb.d/init-roles.sh:ro
+    networks: [ jobradar_net ]
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  migrate:
+    image: postgres:16-alpine
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file: [ .env ]
+    volumes:
+      - ./engine/sql:/migrations/engine:ro
+      - ./app/sql:/migrations/app:ro
+      - ./docker/migrate/run-migrations.sh:/run-migrations.sh:ro
+    entrypoint: [ "sh", "/run-migrations.sh" ]
+    networks: [ jobradar_net ]
+
+  jobs-app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: [ .env ]
+    environment:
+      NODE_ENV: production
+      # This VPS's Docker had a broken IPv6-first resolver; forcing IPv4 first is a cheap,
+      # harmless default for any Docker host that hits the same class of egress issue.
+      NODE_OPTIONS: --dns-result-order=ipv4first
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    volumes:
+      - job-materials:${JOBS_MATERIALS_DIR:-/app/job-materials}:ro
+    ports:
+      - "${JOBS_APP_PORT:-3000}:3000"
+    networks: [ jobradar_net ]
+    healthcheck:
+      test: [ "CMD", "wget", "-q", "--spider", "http://127.0.0.1:3000/" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  engine:
+    build:
+      context: ./engine
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: [ .env ]
+    environment:
+      NODE_OPTIONS: --dns-result-order=ipv4first
+      TZ: ${JOBRADAR_TZ:-Africa/Cairo}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    volumes:
+      # Tailored CV/cover PDFs land here; jobs-app reads the same volume read-only above.
+      # Replaces the old host-path bind mount with a Docker-managed named volume so there's
+      # no dependency on any specific host filesystem layout.
+      - job-materials:/app/output
+
+networks:
+  jobradar_net:
+    driver: bridge
+    # To also expose jobs-app behind your own reverse proxy, add a second network here that
+    # your proxy container shares, e.g.:
+    #   networks: [ jobradar_net, my-proxy-network ]
+    # and add `my-proxy-network: { external: true }` under the top-level `networks:` key.
+
+volumes:
+  pgdata:
+  job-materials:

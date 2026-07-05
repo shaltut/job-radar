@@ -1,0 +1,9 @@
+[Unit]
+Description=Run Job Radar digest daily
+
+[Timer]
+OnCalendar=*-*-* 08:00:00 Africa/Cairo
+Persistent=true
+
+[Install]
+WantedBy=timers.target
